@@ -1,0 +1,185 @@
+ <!DOCTYPE html><html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SEPTEMBER 7 1973</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        color: white;
+        font-family: monospace;
+        overflow: hidden;
+        transition: background 0.2s;
+    }.center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    width: 90%;
+}
+
+.hidden { display: none; }
+
+.glitch { animation: glitch 0.12s infinite; }
+
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -1px); }
+    80% { transform: translate(1px, 2px); }
+    100% { transform: translate(0); }
+}
+
+.red { background: darkred; }
+.green { background: darkgreen; }
+
+button {
+    background: none;
+    border: 1px solid white;
+    color: white;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+    font-family: monospace;
+    transition: 0.2s;
+}
+
+.emotional { filter: blur(2px) contrast(2.2) saturate(2); }
+
+.floatAway { animation: floatAway 1s forwards; }
+
+@keyframes floatAway {
+    0% { transform: translate(0); opacity: 1; }
+    100% { transform: translate(40px, -80px); opacity: 0; }
+}
+
+#blood {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255,0,0,0.25), transparent 70%);
+    opacity: 0;
+    transition: 0.2s;
+}
+
+#blood.active {
+    opacity: 1;
+    animation: bloodPulse 1s infinite;
+}
+
+@keyframes bloodPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+</style>
+</head>
+<body><div id="blood"></div><div id="intro" class="center">
+    <h1>TRIVIA QUESTIONS ABOUT SEPTEMBER 7 1973</h1>
+    <button onclick="startGame()">START</button>
+</div><div id="game" class="center hidden">
+    <h2 id="question"></h2>
+    <div id="choices"></div>
+</div><div id="end" class="center hidden">
+    <h1>She's never coming back</h1>
+    <h2 id="finalWords"></h2>
+</div><script>
+const pattern=["right","right","left","middle","middle","left","right","middle","left","middle","right"];
+let index=0;
+let memory=[];
+
+// ================= 298 WORD DATABASE =================
+const wordsPool=[
+"Cipher","X Lower","Seven Seas","Fraternizing","Letter","Envelope","Underwear","Creepy","Saturated","Neptune","Sad Satan","Happy Death","September","73","Saturn","Toy","Government","Inauguration","Heat","Justin","Pendant","Talisman","Freedom","Watching me","Crimea","Sex","Lateralis","Schism","Astrophysics","Branch","Catcher","Read","Red","Cherry","Eggplant","Peach","Cucumber","Slave","forest","trail","mountain","hillside","valley","ridge","cliff","pine","bracken","heather","mist","fog","drizzle","wind","cold","silence","footsteps","path","waypoint","compass","map","rucksack","boots","laces","waterbottle","torch","glow","dusk","dawn","evening","sunrise","sunset","overcast","canopy","river","stream","bridge","stones","moss","roots","branches","thorns","hollow","clearing","campsite","tent","sleepingbag","zipper","jacket","hood","grief","void","despair","numbness","fading","silence","missing","memory","sadness","anxiety","panic","worry","dread","heaviness","loneliness","isolation","withdrawal","blankness","fogmind","heavyheart","nothingness","absence","lost","fear","tears","crying","exhausted","fatigue","sleepless","heartbreak","broken","shattered","overwhelmed","trapped","falling","sinking","drowning","silencefinal","lostforever","missingperson","echo","whisper","darkness","night","shadow","flicker","static","glitch","distortion","blur","fade","fracture","collapse","signal","frequency","noise","interference","heartbeat","pulse","breath","inhale","exhale","pressure","weight","voiddeep","griefdeep","sadnessdeep","memoryfade","remembering","forgetting","lostsignal","brokensignal","search","searching","wander","wandering","trailend","deadend","turnback","choice","decision","regret","guilt","shame","fearagain","panicagain","silentroom","emptyroom","lockeddoor","openwindow","coldair","warmth","light","faintlight","smalllight","distantlight","redlight","bluelight","signalweak","signalstrong","lastseen","lasttrace","finalmessage","unknown","unheard","unreachable","missingagain","lostagain","fadeagain","breakagain","loop","cycle","endless","returning","neverending","recovery","healing","remembrance"
+];
+
+const emotionalSet=new Set([
+"grief","void","despair","numbness","silence","missing","panic","fear","lost","broken","shattered","sinking","drowning","silencefinal","lostforever","missingperson","echo","whisper","darkness","glitch","distortion","collapse","voiddeep","memoryfade"
+]);
+
+function startGame(){
+    document.getElementById("intro").classList.add("hidden");
+    document.getElementById("game").classList.remove("hidden");
+    next();
+}
+
+function next(){
+    let c=document.getElementById("choices");
+    c.innerHTML="";
+
+    let q=shuffle(wordsPool).slice(0,3);
+
+    if(q.some(w=>emotionalSet.has(w))){ emotionalMode(); }
+
+    q.forEach((w,i)=>{
+        let b=document.createElement("button");
+        b.innerText=w;
+        b.onclick=()=>pick(i,w);
+        c.appendChild(b);
+    });
+
+    document.getElementById("question").innerText="TRUTH CHECK "+(index+1);
+}
+
+function pick(i,w){
+    let p=pattern[index%pattern.length];
+    let map={left:0,middle:1,right:2};
+
+    if(i===map[p]){ correct(w); index++; }
+    else wrong();
+
+    if(index>200) end();
+    else setTimeout(next,250);
+}
+
+function correct(w){
+    memory.push(w);
+    document.body.classList.add("glitch");
+    setTimeout(()=>document.body.classList.remove("glitch"),180);
+}
+
+function wrong(){
+    document.body.classList.add(Math.random()>0.5?"red":"green");
+    setTimeout(()=>{
+        document.body.classList.remove("red");
+        document.body.classList.remove("green");
+    },200);
+}
+
+function emotionalMode(){
+    document.body.classList.add("emotional");
+    document.getElementById("blood").classList.add("active");
+
+    document.querySelectorAll("button").forEach(b=>{
+        if(Math.random()>0.4) b.classList.add("floatAway");
+    });
+
+    setTimeout(()=>{
+        document.body.classList.remove("emotional");
+        document.getElementById("blood").classList.remove("active");
+    },1200);
+}
+
+function end(){
+    document.getElementById("game").classList.add("hidden");
+    document.getElementById("end").classList.remove("hidden");
+
+    let f=document.getElementById("finalWords");
+    let i=0;
+
+    setInterval(()=>{
+        if(i<memory.length){ f.innerText+=memory[i]+" "; i++; }
+        else f.innerText+="\nShe's never coming back\nPLEASE";
+    },120);
+}
+
+function shuffle(a){return a.sort(()=>Math.random()-0.5);}
+</script></body>
+</html>
